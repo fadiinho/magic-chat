@@ -1,17 +1,19 @@
-import Navbar from "./components/Navbar"
-import Chat from "./components/Chat"
-import ChatList from "./components/ChatList"
+import { SocketProvider } from './context/SocketContext';
+import { ChatProvider } from './context/ChatContext';
+import Navbar from './components/Navbar';
+import { Home } from './components/Home';
+
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <div  className="h-[90%] flex">
-        <ChatList />
-        <Chat />
-      </div>
-    </>
+    <SocketProvider>
+      <ChatProvider>
+        <Navbar />
+        <Home />
+      </ChatProvider>
+    </SocketProvider>
   )
 }
+
 export default App
 

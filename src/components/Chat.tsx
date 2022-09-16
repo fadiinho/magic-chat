@@ -1,7 +1,12 @@
 import { useState } from "react";
+import { IMessage, IUser } from '../types/socket';
+import { useSocket } from '../hooks/useSocket';
+import { useChat } from '../hooks/useChat';
 
-const Message = ({ userId, content, fromMe, timestamp }: { userId: string; content: string; fromMe: boolean; timestamp: number }) => {
+const Message = ({ userId, content, timestamp, me }: IMessage & { me: IUser | undefined }) => {
     const time = new Date(timestamp);
+    const fromMe = userId === me?.userId;
+
     return (
         <div
             id="message" 
@@ -17,51 +22,44 @@ const Message = ({ userId, content, fromMe, timestamp }: { userId: string; conte
 }
 
 const Chat = () => {
-    const [message, setMessage] = useState("");
-    const messages = [{
-        userId: "Person 1",
-        content: "Hello",
-        fromMe: false,
-        timestamp: 1663066725138
-    }, {
-        userId: "Me",
-        content: "Hello, how are you?",
-        fromMe: true,
-        timestamp: 1663102582890
-    }, {
-        userId: "Person 1",
-        content: "I'm fine",
-        fromMe: false,
-        timestamp: 1663102582890
-    }]
+    const { messages, sendMessage, me } = useSocket();
+    const { selectedUser } = useChat();
 
-    const sendMessage = () => {
-        console.log(message);
-        setMessage("");
+    const [ value, setValue ] = useState('');
+
+    const _sendMessage = () => {
+        if (!value) return;
+        if (!sendMessage) return;
+        sendMessage(value);
+        setValue('');
     }
 
     return (
-        <div className="w-3/4 basis-full overflow-hidden self-end h-full flex flex-col items-center bg-background transtion">
-            <div className="py-1 px-2 flex flex-col w-full h-full overflow-auto">
-                {messages.map((message, i) => 
-                    <Message key={i} {...message}/>)
-                } 
-            </div>
-            <div className="w-full py-1 flex rounded">
-                <input 
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                    onKeyDown={(event) => event.key === "Enter" ? sendMessage() : undefined}
-                    onSubmit={sendMessage}
-                    className="p-1 mx-1 w-full rounded border bg-primary" 
-                    placeholder="Digite sua mensagem..." 
-                />
-                <button 
-                    onClick={sendMessage}
-                    className="p-1 mx-1 rounded border  bg-primary active:bg-purple-600 hover:bg-purple-700"
-                >Enviar</button>
-            </div>
-        </div>
+        <>
+            {selectedUser &&
+                <div className="w-3/4 basis-full overflow-hidden self-end h-full flex flex-col items-center bg-background transtion">
+                    <div className="py-1 px-2 flex flex-col w-full h-full overflow-auto">
+                        {messages.map((message) =>
+                            <Message key={message.id} me={me} {...message}/>)
+                        }
+                    </div>
+                    <div className="w-full py-1 flex rounded">
+                        <input
+                            value={value}
+                            onChange={(event) => setValue(event.target.value)}
+                            onKeyDown={(event) => event.key === "Enter" ? _sendMessage() : undefined}
+                            onSubmit={_sendMessage}
+                            className="p-1 mx-1 w-full rounded border bg-primary"
+                            placeholder="Digite sua mensagem..."
+                        />
+                        <button
+                            onClick={_sendMessage}
+                            className="p-1 mx-1 rounded border bg-primary active:bg-purple-600 hover:bg-purple-700"
+                        >Enviar</button>
+                    </div>
+                </div>
+            }
+        </>
     )
 }
 

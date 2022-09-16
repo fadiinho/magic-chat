@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useSocket } from "../hooks/useSocket";
+import { IUser } from '../types/socket';
 
-interface UserProfile {
-    id: string;
-    username: string;
-    profilePicture?: string;
-}
 
-const Profile = ({ username, profilePicture }: UserProfile ) => {
+const Profile = ({ username, profilePicture }: IUser) => {
     return (
         <div className="flex mb-1 rounded bg-primary cursor-pointer hover:bg-purple-700">
             <div id="user-profile-picture">
@@ -25,29 +22,10 @@ const Profile = ({ username, profilePicture }: UserProfile ) => {
 }
 
 const ChatList = () => {
+    const { socket, users } = useSocket();
     const [chatListVisible, setChatListVisible] = useState(true);
     const chatListRef = useRef<HTMLDivElement>(null);
 
-    const profiles: UserProfile[] = [
-        {
-            id: "asodjiaosjdo",
-            username: "yuka_chu",
-            profilePicture: undefined
-        }, {
-            id: "asjdaisusi",
-            username: "fadiinho",
-            profilePicture: undefined
-        }, {
-            id: "jroiejfofijer",
-            username: "Person 1",
-            profilePicture: undefined
-        }, {
-            id: "jwoewoen",
-            username: "Person 2",
-            profilePicture: undefined
-        }
-    ]
-    
     useEffect(() => {
         chatListRef.current?.classList.toggle('-translate-x-full');
     }, [chatListVisible]);
@@ -55,11 +33,11 @@ const ChatList = () => {
     return (
         <>
             {!chatListVisible &&
-            <div id="arrow-right" className="absolute rounded cursor-pointer sm:pt-1" onClick={() => setChatListVisible(true)}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeWidth={1.5} className="w-8 h-8 stroke-white">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-            </div>
+                <div id="arrow-right" className="absolute rounded cursor-pointer sm:pt-1" onClick={() => setChatListVisible(true)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeWidth={1.5} className="w-8 h-8 stroke-white">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </div>
             }
             <div ref={chatListRef}  className="absolute m-1 w-48 flex flex-col bg-background transition transform sm:relative sm:w-1/4 sm:m-0 sm:p-1 sm:border-r sm:rounded-none">
                 <div id="arrow-left" className="w-fit rounded cursor-pointer" onClick={() => setChatListVisible(false)}>
@@ -67,7 +45,7 @@ const ChatList = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
                 </div>
-                {profiles.map((item) => <Profile key={item.id} {...item} />)}
+                {users.map((item) => socket.id !== item.user.userId  && <Profile key={item.user.userId} {...item.user} />)}
             </div>
         </>
     )
