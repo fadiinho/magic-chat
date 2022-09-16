@@ -13,7 +13,9 @@ export interface ChatContextProps {
 export const ChatContext = createContext({} as IChatContext);
 
 export const ChatProvider: FC<ChatContextProps> = ({ children }) => {
-  const [ selectedUser, setSelectedUser ] = useState<IUser | undefined>(undefined);
+  const [selectedUser, setSelectedUser] = useState<IUser | undefined>(
+    undefined,
+  );
 
   return (
     <ChatContext.Provider value={{ selectedUser, setSelectedUser }}>
